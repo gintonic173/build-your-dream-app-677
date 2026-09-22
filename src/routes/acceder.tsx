@@ -151,7 +151,7 @@ function AccessScreen() {
               size="lg"
               variant="default"
             >
-              {busy ? "Un momento…" : mode === "signin" ? "Entrar" : "Crear cuenta"}
+              {busy ? "Un momento…" : mode === "signin" ? "Entrar" : "Registrarme"}
             </Button>
           </form>
 
