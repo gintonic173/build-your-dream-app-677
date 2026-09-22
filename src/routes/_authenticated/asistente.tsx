@@ -10,7 +10,6 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { VoltioMark } from "@/components/brand";
-import { Badge } from "@/components/ui/badge";
 import {
   Conversation,
   ConversationContent,
@@ -207,8 +206,8 @@ function ChatWindow({
           <PromptInputFooter className="justify-end px-1 pb-1">
             <PromptInputSubmit
               status={status}
-              onStop={isBusy ? stop : undefined}
               disabled={status === "error"}
+              {...(isBusy ? { onStop: () => void stop() } : {})}
             />
           </PromptInputFooter>
         </PromptInput>
@@ -271,12 +270,16 @@ function ToolView({ part }: { part: ToolPart }) {
 
   return (
     <Tool defaultOpen={false} className="border-hairline bg-muted/30">
-      <ToolHeader
-        type={part.type}
-        state={part.state}
-        toolName={part.type === "dynamic-tool" ? part.toolName : undefined}
-        title={title}
-      />
+      {part.type === "dynamic-tool" ? (
+        <ToolHeader
+          type="dynamic-tool"
+          state={part.state}
+          toolName={part.toolName}
+          title={title}
+        />
+      ) : (
+        <ToolHeader type={part.type} state={part.state} title={title} />
+      )}
       <ToolContent>
         <ToolInput input={part.input} />
         <ToolOutput output={part.output} errorText={part.errorText} />
@@ -284,5 +287,3 @@ function ToolView({ part }: { part: ToolPart }) {
     </Tool>
   );
 }
-
-export { Badge };
