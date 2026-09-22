@@ -1,31 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, Outlet, createFileRoute, useRouter } from "@tanstack/react-router";
 import {
   BatteryCharging,
   Bot,
   Gauge,
   LogOut,
-  Road,
+  Navigation,
   Settings,
   Wrench,
 } from "lucide-react";
 import { useAuth } from "@/lib/session";
 import { supabase } from "@/integrations/supabase/client";
 import { VoltioMark } from "@/components/brand";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/_authenticated")({
   component: AuthenticatedLayout,
 });
 
 const NAV = [
-  { to: "/", label: "Resumen", icon: Gauge },
-  { to: "/cargas", label: "Cargas", icon: BatteryCharging },
-  { to: "/rutas", label: "Rutas", icon: Road },
-  { to: "/mantenimiento", label: "Mantenimiento", icon: Wrench },
-  { to: "/asistente", label: "Asistente", icon: Bot },
-  { to: "/ajustes", label: "Ajustes", icon: Settings },
+  { to: "/", label: "Resumen", short: "Resumen", icon: Gauge },
+  { to: "/cargas", label: "Cargas", short: "Cargas", icon: BatteryCharging },
+  { to: "/rutas", label: "Rutas", short: "Rutas", icon: Navigation },
+  { to: "/mantenimiento", label: "Mantenimiento", short: "Taller", icon: Wrench },
+  { to: "/asistente", label: "Asistente", short: "Asistente", icon: Bot },
+  { to: "/ajustes", label: "Ajustes", short: "Ajustes", icon: Settings },
 ] as const;
+
+type NavItemProps = (typeof NAV)[number];
 
 function AuthenticatedLayout() {
   const { signedIn, loading } = useAuth();
@@ -53,7 +54,6 @@ function AppShell() {
 
   return (
     <div className="min-h-screen md:flex">
-      {/* Desktop rail */}
       <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-hairline bg-surface/60 p-5 backdrop-blur-xl md:flex">
         <Link to="/" className="flex items-center gap-2.5">
           <VoltioMark size={28} />
@@ -85,7 +85,6 @@ function AppShell() {
         </div>
       </main>
 
-      {/* Mobile bar */}
       <nav className="fixed inset-x-0 bottom-0 z-30 flex justify-around border-t border-hairline bg-surface/95 px-2 py-1.5 backdrop-blur-xl md:hidden">
         {NAV.map((item) => (
           <MobileNavItem key={item.to} {...item} />
@@ -94,8 +93,6 @@ function AppShell() {
     </div>
   );
 }
-
-type NavItemProps = { to: string; label: string; icon: typeof Gauge };
 
 function NavItem({ to, label, icon: Icon }: NavItemProps) {
   return (
@@ -111,7 +108,7 @@ function NavItem({ to, label, icon: Icon }: NavItemProps) {
   );
 }
 
-function MobileNavItem({ to, label, icon: Icon }: NavItemProps) {
+function MobileNavItem({ to, short, icon: Icon }: NavItemProps) {
   return (
     <Link
       to={to}
@@ -120,9 +117,7 @@ function MobileNavItem({ to, label, icon: Icon }: NavItemProps) {
       activeOptions={{ exact: to === "/" }}
     >
       <Icon className="size-5" />
-      <span className="truncate">{label.split(" ")[0]}</span>
+      <span className="truncate">{short}</span>
     </Link>
   );
 }
-
-export { cn };

@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Navigate, createFileRoute, navigate } from "@tanstack/react-router";
+import { Navigate, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/session";
@@ -32,6 +32,7 @@ export const Route = createFileRoute("/acceder")({
 
 function AccessScreen() {
   const { signedIn, loading } = useAuth();
+  const navigate = useNavigate();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -46,20 +47,24 @@ function AccessScreen() {
     try {
       if (mode === "signin") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) return toast.error(error.message);
-        await navigate({ to: "/" });
+        if (error) {
+          toast.error(error.message);
+        } else {
+          await navigate({ to: "/" });
+        }
       } else {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: { emailRedirectTo: window.location.origin },
         });
-        if (error) return toast.error(error.message);
-        if (!data.session) {
+        if (error) {
+          toast.error(error.message);
+        } else if (!data.session) {
           toast.success("Casi listo: confirma tu correo para entrar.");
-          return;
+        } else {
+          await navigate({ to: "/" });
         }
-        await navigate({ to: "/" });
       }
     } finally {
       setBusy(false);
