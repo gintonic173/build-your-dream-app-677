@@ -48,7 +48,7 @@ export type Database = {
           price_per_kwh?: number | null
           source?: string
           start_soc?: number | null
-          user_id: string
+          user_id?: string
           vehicle_id: string
         }
         Update: {
@@ -94,7 +94,7 @@ export type Database = {
           id?: never
           message_id?: string | null
           role: string
-          user_id: string
+          user_id?: string
         }
         Update: {
           content?: Json
@@ -126,7 +126,7 @@ export type Database = {
           metric?: Json | null
           severity?: string
           title: string
-          user_id: string
+          user_id?: string
           vehicle_id?: string | null
         }
         Update: {
@@ -180,7 +180,7 @@ export type Database = {
           occurred_at?: string
           provider?: string | null
           title: string
-          user_id: string
+          user_id?: string
           vehicle_id: string
         }
         Update: {
@@ -253,7 +253,7 @@ export type Database = {
           note?: string | null
           occurred_at?: string
           start_soc?: number | null
-          user_id: string
+          user_id?: string
           vehicle_id: string
         }
         Update: {
@@ -304,7 +304,7 @@ export type Database = {
           model_year?: number | null
           name: string
           plate?: string | null
-          user_id: string
+          user_id?: string
           wltp_range_km?: number | null
         }
         Update: {

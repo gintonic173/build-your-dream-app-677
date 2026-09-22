@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   Bar,
@@ -24,7 +25,14 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VehicleForm } from "@/components/vehicle-form";
 import { VoltioMark } from "@/components/brand";
-import { useInsights, useInsightActions, useCharges, useTrips, useVehicles } from "@/lib/queries";
+import {
+  keys,
+  useInsights,
+  useInsightActions,
+  useCharges,
+  useTrips,
+  useVehicles,
+} from "@/lib/queries";
 import { runHealthCheck } from "@/lib/insights.functions";
 import {
   KIND_LABELS,
@@ -229,12 +237,14 @@ function Stat({
 
 function HealthCheckButton() {
   const runHealth = useServerFn(runHealthCheck);
+  const queryClient = useQueryClient();
   const [busy, setBusy] = useState(false);
 
   async function handleRun() {
     setBusy(true);
     try {
       const result = await runHealth({});
+      await queryClient.invalidateQueries({ queryKey: keys.insights });
       toast[result.created ? "success" : "message"](
         result.message ?? "Análisis completado",
       );

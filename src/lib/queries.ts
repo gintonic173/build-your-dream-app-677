@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import type { Vehicle } from "@/lib/ev";
 import {
   chargesRepo,
   deleteInsight,
@@ -66,16 +67,23 @@ export function useChatHistory() {
   });
 }
 
+/** The vehicle everything is filed under (the app supports one for now). */
+export function useActiveVehicle(): Vehicle | undefined {
+  return useVehicles().data?.[0];
+}
+
 export function useRecordWriter<T extends { id: string }>(
   queryKey: readonly unknown[],
   repo: Repo<T>,
+  extraValues?: Record<string, unknown>,
 ) {
   const queryClient = useQueryClient();
   const invalidate = () => queryClient.invalidateQueries({ queryKey });
 
   return {
     create: useMutation({
-      mutationFn: (values: Record<string, unknown>) => repo.create(values),
+      mutationFn: (values: Record<string, unknown>) =>
+        repo.create({ ...extraValues, ...values }),
       onSuccess: invalidate,
     }),
     update: useMutation({

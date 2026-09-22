@@ -84,20 +84,28 @@ function formFromRow(fields: Field[], row: Record<string, unknown>): Record<stri
   return form;
 }
 
-function toValues(fields: Field[], form: Record<string, string>): Record<string, unknown> {
+function toValues(
+  fields: Field[],
+  form: Record<string, string>,
+  omitEmpty = false,
+): Record<string, unknown> {
   const values: Record<string, unknown> = {};
   for (const field of fields) {
     const raw = form[field.name] ?? "";
+    const empty = raw === "" || (field.type === "select" && raw === UNSELECTED);
     if (field.type === "switch") {
       values[field.name] = raw === "true";
-    } else if (raw === "" || (field.type === "select" && raw === UNSELECTED)) {
+    } else if (empty && omitEmpty) {
+      // On create, leave the field out so any database default applies.
+      continue;
+    } else if (empty) {
       values[field.name] = null;
     } else if (field.type === "number") {
       values[field.name] = Number(raw.replace(",", "."));
     } else if (field.type === "datetime") {
       values[field.name] = new Date(raw).toISOString();
     } else if (field.type === "date") {
-      values[field.name] = new Date(`${raw}T12:00:00`).toISOString();
+      values[field.name] = raw;
     } else {
       values[field.name] = raw;
     }
@@ -146,7 +154,7 @@ export function RecordManager<T extends { id: string }>({
     event.preventDefault();
     setBusy(true);
     try {
-      const values = toValues(fields, form);
+      const values = toValues(fields, form, !editing);
       if (editing) await writer.update.mutateAsync({ id: editing.id, values });
       else await writer.create.mutateAsync(values);
       toast.success(editing ? "Cambios guardados" : `${singular} registrado`);

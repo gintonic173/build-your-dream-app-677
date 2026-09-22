@@ -1,7 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RecordManager, type Field } from "@/components/record-manager";
+import { NeedVehicle } from "@/components/need-vehicle";
 import { chargesRepo } from "@/lib/db";
-import { keys, useCharges, useRecordWriter } from "@/lib/queries";
+import {
+  keys,
+  useActiveVehicle,
+  useCharges,
+  useRecordWriter,
+} from "@/lib/queries";
 import {
   CHARGER_TYPES,
   formatEuro,
@@ -47,6 +53,7 @@ const FIELDS: Field[] = [
     label: "Tipo de carga",
     type: "select",
     options: CHARGER_TYPES,
+    defaultValue: "home",
     half: true,
   },
   { name: "start_soc", label: "Batería inicial (%)", type: "number", half: true },
@@ -57,8 +64,15 @@ const FIELDS: Field[] = [
 ];
 
 function ChargesPage() {
+  const vehicle = useActiveVehicle();
   const charges = useCharges();
-  const writer = useRecordWriter(keys.charges, chargesRepo);
+  const writer = useRecordWriter(
+    keys.charges,
+    chargesRepo,
+    vehicle ? { vehicle_id: vehicle.id } : undefined,
+  );
+
+  if (!vehicle) return <NeedVehicle />;
 
   return (
     <RecordManager<ChargingSession>

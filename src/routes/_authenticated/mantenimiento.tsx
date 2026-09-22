@@ -1,7 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RecordManager, type Field } from "@/components/record-manager";
+import { NeedVehicle } from "@/components/need-vehicle";
 import { maintenanceRepo } from "@/lib/db";
-import { keys, useMaintenance, useRecordWriter } from "@/lib/queries";
+import {
+  keys,
+  useActiveVehicle,
+  useMaintenance,
+  useRecordWriter,
+} from "@/lib/queries";
 import {
   MAINTENANCE_CATEGORIES,
   formatEuro,
@@ -39,6 +45,7 @@ const FIELDS: Field[] = [
     label: "Categoría",
     type: "select",
     options: MAINTENANCE_CATEGORIES,
+    defaultValue: "inspection",
     half: true,
   },
   { name: "cost_eur", label: "Coste (€)", type: "number", half: true },
@@ -50,8 +57,15 @@ const FIELDS: Field[] = [
 ];
 
 function MaintenancePage() {
+  const vehicle = useActiveVehicle();
   const maintenance = useMaintenance();
-  const writer = useRecordWriter(keys.maintenance, maintenanceRepo);
+  const writer = useRecordWriter(
+    keys.maintenance,
+    maintenanceRepo,
+    vehicle ? { vehicle_id: vehicle.id } : undefined,
+  );
+
+  if (!vehicle) return <NeedVehicle />;
 
   return (
     <RecordManager<MaintenanceRecord>
