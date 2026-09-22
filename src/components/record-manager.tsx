@@ -97,7 +97,7 @@ function toValues(fields: Field[], form: Record<string, string>): Record<string,
     } else if (field.type === "datetime") {
       values[field.name] = new Date(raw).toISOString();
     } else if (field.type === "date") {
-      values[field.name] = new Date(`${raw}T12:00:00`).toISOString();
+      values[field.name] = raw;
     } else {
       values[field.name] = raw;
     }
