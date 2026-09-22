@@ -45,6 +45,7 @@ const FIELDS: Field[] = [
     label: "Categoría",
     type: "select",
     options: MAINTENANCE_CATEGORIES,
+    defaultValue: "inspection",
     half: true,
   },
   { name: "cost_eur", label: "Coste (€)", type: "number", half: true },
