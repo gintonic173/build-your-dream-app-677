@@ -1,7 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { RecordManager, type Field } from "@/components/record-manager";
+import { NeedVehicle } from "@/components/need-vehicle";
 import { tripsRepo } from "@/lib/db";
-import { keys, useRecordWriter, useTrips } from "@/lib/queries";
+import {
+  keys,
+  useActiveVehicle,
+  useRecordWriter,
+  useTrips,
+} from "@/lib/queries";
 import { formatKm, formatKwh, formatNumber, type Trip } from "@/lib/ev";
 
 export const Route = createFileRoute("/_authenticated/rutas")({
@@ -45,8 +51,15 @@ function consumption(trip: Trip): number | null {
 }
 
 function TripsPage() {
+  const vehicle = useActiveVehicle();
   const trips = useTrips();
-  const writer = useRecordWriter(keys.trips, tripsRepo);
+  const writer = useRecordWriter(
+    keys.trips,
+    tripsRepo,
+    vehicle ? { vehicle_id: vehicle.id } : undefined,
+  );
+
+  if (!vehicle) return <NeedVehicle />;
 
   return (
     <RecordManager<Trip>
