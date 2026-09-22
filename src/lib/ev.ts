@@ -1,64 +1,69 @@
 /**
  * Shared domain types, labels and derived metrics for Voltio.
- * Pure and browser-safe — no Supabase imports here.
+ * Field names mirror the database schema exactly. Pure and browser-safe.
  */
 
 export type Vehicle = {
   id: string;
   user_id: string;
   name: string;
-  brand: string | null;
+  make: string | null;
   model: string | null;
+  model_year: number | null;
+  plate: string | null;
   battery_kwh: number | null;
   efficiency_wh_km: number | null;
-  starting_range_km: number | null;
+  wltp_range_km: number | null;
   created_at: string;
 };
 
 export type ChargingSession = {
   id: string;
   user_id: string;
-  vehicle_id: string | null;
-  started_at: string;
-  ended_at: string | null;
+  vehicle_id: string;
+  occurred_at: string;
   energy_kwh: number;
   cost_eur: number | null;
+  currency: string;
   price_per_kwh: number | null;
-  location: string | null;
-  charge_type: string | null;
-  soc_start: number | null;
-  soc_end: number | null;
-  notes: string | null;
+  charger_type: string | null;
+  start_soc: number | null;
+  end_soc: number | null;
+  location_label: string | null;
+  mileage_km: number | null;
+  note: string | null;
+  source: string;
   created_at: string;
 };
 
 export type Trip = {
   id: string;
   user_id: string;
-  vehicle_id: string | null;
-  started_at: string;
+  vehicle_id: string;
+  occurred_at: string;
   distance_km: number;
   energy_kwh: number | null;
-  soc_start: number | null;
-  soc_end: number | null;
-  route_type: string | null;
-  weather: string | null;
-  notes: string | null;
+  start_soc: number | null;
+  end_soc: number | null;
+  avg_speed_kmh: number | null;
+  label: string | null;
+  note: string | null;
   created_at: string;
 };
 
 export type MaintenanceRecord = {
   id: string;
   user_id: string;
-  vehicle_id: string | null;
-  performed_at: string;
+  vehicle_id: string;
+  occurred_at: string;
   category: string;
   title: string;
   description: string | null;
   cost_eur: number | null;
-  odometer_km: number | null;
-  due_at: string | null;
-  due_km: number | null;
+  currency: string;
+  mileage_km: number | null;
+  next_due_at: string | null;
+  next_due_km: number | null;
   provider: string | null;
   created_at: string;
 };
@@ -70,29 +75,22 @@ export type Insight = {
   id: string;
   user_id: string;
   vehicle_id: string | null;
-  kind: InsightKind;
-  severity: InsightSeverity;
+  kind: string;
+  severity: string;
   title: string;
   body: string;
-  metric: Record<string, unknown> | null;
+  metric: unknown;
   created_at: string;
-  dismissed_at: string | null;
 };
 
 /* ---------------------------------- labels --------------------------------- */
 
-export const CHARGE_TYPES = [
+export const CHARGER_TYPES = [
   { value: "home", label: "Casa" },
   { value: "work", label: "Trabajo" },
   { value: "ac", label: "AC público" },
   { value: "dc", label: "DC rápido" },
   { value: "ultra", label: "Ultra rápido" },
-];
-
-export const ROUTE_TYPES = [
-  { value: "city", label: "Ciudad" },
-  { value: "mixed", label: "Mixto" },
-  { value: "highway", label: "Autopista" },
 ];
 
 export const MAINTENANCE_CATEGORIES = [
@@ -105,14 +103,14 @@ export const MAINTENANCE_CATEGORIES = [
   { value: "other", label: "Otro" },
 ];
 
-export const KIND_LABELS: Record<InsightKind, string> = {
+export const KIND_LABELS: Record<string, string> = {
   anomaly: "Anomalía",
   trend: "Tendencia",
   forecast: "Previsión",
   tip: "Consejo",
 };
 
-export const SEVERITY_LABELS: Record<InsightSeverity, string> = {
+export const SEVERITY_LABELS: Record<string, string> = {
   info: "Info",
   watch: "Vigilar",
   alert: "Revisar",
@@ -137,10 +135,7 @@ const euro = new Intl.NumberFormat("es-ES", {
 export const formatEuro = (value: number | null | undefined) =>
   value == null || Number.isNaN(value) ? "—" : euro.format(value);
 
-export const formatNumber = (
-  value: number | null | undefined,
-  digits = 1,
-) =>
+export const formatNumber = (value: number | null | undefined, digits = 1) =>
   value == null || Number.isNaN(value)
     ? "—"
     : new Intl.NumberFormat("es-ES", {
@@ -242,15 +237,16 @@ export function computeOverview(
     : null;
 
   const tripEnergy = trips.reduce((sum, trip) => sum + (trip.energy_kwh ?? 0), 0);
-  const avgConsumption = totalDistance > 0 && tripEnergy > 0 ? (tripEnergy / totalDistance) * 1000 : null;
+  const avgConsumption =
+    totalDistance > 0 && tripEnergy > 0 ? (tripEnergy / totalDistance) * 1000 : null;
   const costPerKm = totalDistance > 0 && totalCost > 0 ? totalCost / totalDistance : null;
 
   const thisMonth = currentMonthKey();
-  const monthCharges = charges.filter((charge) => monthKey(charge.started_at) === thisMonth);
+  const monthCharges = charges.filter((charge) => monthKey(charge.occurred_at) === thisMonth);
   const monthEnergy = monthCharges.reduce((sum, charge) => sum + (charge.energy_kwh ?? 0), 0);
   const monthCost = monthCharges.reduce((sum, charge) => sum + (charge.cost_eur ?? 0), 0);
 
-  // Last 8 weeks of energy + cost, newest last.
+  // Last 8 weeks of energy + cost, oldest first.
   const weeks: { label: string; start: number; end: number }[] = [];
   const now = new Date();
   for (let index = 7; index >= 0; index -= 1) {
@@ -267,49 +263,53 @@ export function computeOverview(
     });
   }
 
+  const inWeek = (value: string, week: { start: number; end: number }) => {
+    const time = new Date(value).getTime();
+    return time >= week.start && time <= week.end;
+  };
+
   const energySeries = weeks.map((week) => {
-    const inWeek = charges.filter((charge) => {
-      const time = new Date(charge.started_at).getTime();
-      return time >= week.start && time <= week.end;
-    });
+    const rows = charges.filter((charge) => inWeek(charge.occurred_at, week));
     return {
       label: week.label,
       energy: Number(
-        inWeek.reduce((sum, charge) => sum + (charge.energy_kwh ?? 0), 0).toFixed(1),
+        rows.reduce((sum, charge) => sum + (charge.energy_kwh ?? 0), 0).toFixed(1),
       ),
-      cost: Number(
-        inWeek.reduce((sum, charge) => sum + (charge.cost_eur ?? 0), 0).toFixed(2),
-      ),
+      cost: Number(rows.reduce((sum, charge) => sum + (charge.cost_eur ?? 0), 0).toFixed(2)),
     };
   });
 
   const consumptionSeries = weeks.map((week) => {
-    const inWeek = trips.filter((trip) => {
-      const time = new Date(trip.started_at).getTime();
-      return time >= week.start && time <= week.end;
-    });
-    const distance = inWeek.reduce((sum, trip) => sum + (trip.distance_km ?? 0), 0);
-    const energy = inWeek.reduce((sum, trip) => sum + (trip.energy_kwh ?? 0), 0);
+    const rows = trips.filter((trip) => inWeek(trip.occurred_at, week));
+    const distance = rows.reduce((sum, trip) => sum + (trip.distance_km ?? 0), 0);
+    const energy = rows.reduce((sum, trip) => sum + (trip.energy_kwh ?? 0), 0);
     return {
       label: week.label,
-      consumption: distance > 0 && energy > 0 ? Math.round((energy / distance) * 1000) : null,
+      consumption:
+        distance > 0 && energy > 0 ? Math.round((energy / distance) * 1000) : null,
     };
   });
 
   const types = new Map<string, { energy: number; count: number }>();
   for (const charge of charges) {
-    const type = charge.charge_type ?? "home";
+    const type = charge.charger_type ?? "home";
     const entry = types.get(type) ?? { energy: 0, count: 0 };
     entry.energy += charge.energy_kwh ?? 0;
     entry.count += 1;
     types.set(type, entry);
   }
   const typeBreakdown = [...types.entries()]
-    .map(([type, entry]) => ({ type, energy: Number(entry.energy.toFixed(1)), count: entry.count }))
+    .map(([type, entry]) => ({
+      type,
+      energy: Number(entry.energy.toFixed(1)),
+      count: entry.count,
+    }))
     .sort((a, b) => b.energy - a.energy);
 
   const lastCharge = [...charges]
-    .sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime())
+    .sort(
+      (a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime(),
+    )
     .at(0) ?? null;
 
   return {
@@ -330,27 +330,26 @@ export function computeOverview(
   };
 }
 
-/** Battery state of health estimate from recent charge curves (rough proxy). */
+/** Rough battery state-of-health proxy from recent charge curves. */
 export function estimateSoH(charges: ChargingSession[]): number | null {
   const usable = charges.filter(
     (charge) =>
-      charge.soc_start != null &&
-      charge.soc_end != null &&
-      charge.soc_end > charge.soc_start &&
+      charge.start_soc != null &&
+      charge.end_soc != null &&
+      charge.end_soc > charge.start_soc &&
       (charge.energy_kwh ?? 0) > 0,
   );
   if (usable.length < 3) return null;
 
   const implied = usable.map(
-    (charge) => (charge.energy_kwh / (charge.soc_end! - charge.soc_start!)) * 100,
+    (charge) => (charge.energy_kwh / (charge.end_soc! - charge.start_soc!)) * 100,
   );
   const best = Math.max(...implied);
   if (!Number.isFinite(best) || best <= 0) return null;
 
   const newest = [...usable]
-    .sort((a, b) => new Date(b.started_at).getTime() - new Date(a.started_at).getTime())
+    .sort((a, b) => new Date(b.occurred_at).getTime() - new Date(a.occurred_at).getTime())
     .at(0)!;
-  const latest = (newest.energy_kwh / (newest.soc_end! - newest.soc_start!)) * 100;
-  const ratio = (latest / best) * 100;
-  return Math.min(100, Math.max(70, Math.round(ratio)));
+  const latest = (newest.energy_kwh / (newest.end_soc! - newest.start_soc!)) * 100;
+  return Math.min(100, Math.max(70, Math.round((latest / best) * 100)));
 }

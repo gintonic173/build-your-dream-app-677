@@ -43,18 +43,18 @@ export const runHealthCheck = createServerFn({ method: "POST" })
     const [charges, trips, maintenance, vehicle] = await Promise.all([
       supabase
         .from("charging_sessions")
-        .select("started_at, energy_kwh, cost_eur, price_per_kwh, charge_type, soc_start, soc_end, location")
-        .order("started_at", { ascending: false })
+        .select("occurred_at, energy_kwh, cost_eur, price_per_kwh, charger_type, start_soc, end_soc, location_label")
+        .order("occurred_at", { ascending: false })
         .limit(150),
       supabase
         .from("trips")
-        .select("started_at, distance_km, energy_kwh, route_type, weather, soc_start, soc_end")
-        .order("started_at", { ascending: false })
+        .select("occurred_at, distance_km, energy_kwh, start_soc, end_soc, label")
+        .order("occurred_at", { ascending: false })
         .limit(150),
       supabase
         .from("maintenance_records")
-        .select("performed_at, category, title, cost_eur, odometer_km, due_at, due_km")
-        .order("performed_at", { ascending: false })
+        .select("occurred_at, category, title, cost_eur, mileage_km, next_due_at, next_due_km")
+        .order("occurred_at", { ascending: false })
         .limit(50),
       supabase.from("vehicles").select("*").order("created_at").limit(1).maybeSingle(),
     ]);

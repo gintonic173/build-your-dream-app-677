@@ -3,19 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import {
   chargesRepo,
   deleteInsight,
-  dismissInsight,
   maintenanceRepo,
   tripsRepo,
   vehiclesRepo,
   type Repo,
 } from "@/lib/db";
-import type {
-  ChargingSession,
-  Insight,
-  MaintenanceRecord,
-  Trip,
-  Vehicle,
-} from "@/lib/ev";
 
 export const keys = {
   vehicles: ["vehicles"] as const,
@@ -47,10 +39,10 @@ export function useInsights() {
       const { data, error } = await supabase
         .from("insights")
         .select("*")
-        .is("dismissed_at", null)
-        .order("created_at", { ascending: false });
+        .order("created_at", { ascending: false })
+        .limit(30);
       if (error) throw new Error(error.message);
-      return (data ?? []) as Insight[];
+      return (data ?? []) as import("@/lib/ev").Insight[];
     },
   });
 }
@@ -81,31 +73,29 @@ export function useRecordWriter<T extends { id: string }>(
   const queryClient = useQueryClient();
   const invalidate = () => queryClient.invalidateQueries({ queryKey });
 
-  const create = useMutation({
-    mutationFn: (values: Record<string, unknown>) => repo.create(values),
-    onSuccess: invalidate,
-  });
-  const update = useMutation({
-    mutationFn: ({ id, values }: { id: string; values: Record<string, unknown> }) =>
-      repo.update(id, values),
-    onSuccess: invalidate,
-  });
-  const remove = useMutation({
-    mutationFn: (id: string) => repo.remove(id),
-    onSuccess: invalidate,
-  });
-
-  return { create, update, remove };
+  return {
+    create: useMutation({
+      mutationFn: (values: Record<string, unknown>) => repo.create(values),
+      onSuccess: invalidate,
+    }),
+    update: useMutation({
+      mutationFn: ({ id, values }: { id: string; values: Record<string, unknown> }) =>
+        repo.update(id, values),
+      onSuccess: invalidate,
+    }),
+    remove: useMutation({
+      mutationFn: (id: string) => repo.remove(id),
+      onSuccess: invalidate,
+    }),
+  };
 }
 
 export function useInsightActions() {
   const queryClient = useQueryClient();
-  const invalidate = () => queryClient.invalidateQueries({ queryKey: keys.insights });
-
   return {
-    dismiss: useMutation({ mutationFn: dismissInsight, onSuccess: invalidate }),
-    remove: useMutation({ mutationFn: deleteInsight, onSuccess: invalidate }),
+    remove: useMutation({
+      mutationFn: deleteInsight,
+      onSuccess: () => queryClient.invalidateQueries({ queryKey: keys.insights }),
+    }),
   };
 }
-
-export type { ChargingSession, MaintenanceRecord, Trip, Vehicle };
