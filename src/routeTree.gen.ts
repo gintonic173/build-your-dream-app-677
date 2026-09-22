@@ -9,50 +9,227 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as AccederRouteImport } from './routes/acceder'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
+import { Route as AuthenticatedAsistenteRouteImport } from './routes/_authenticated/asistente'
+import { Route as AuthenticatedCargasRouteImport } from './routes/_authenticated/cargas'
+import { Route as AuthenticatedMantenimientoRouteImport } from './routes/_authenticated/mantenimiento'
+import { Route as AuthenticatedRutasRouteImport } from './routes/_authenticated/rutas'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
 
-const IndexRoute = IndexRouteImport.update({
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AccederRoute = AccederRouteImport.update({
+  id: '/acceder',
+  path: '/acceder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAjustesRoute = AuthenticatedAjustesRouteImport.update({
+  id: '/ajustes',
+  path: '/ajustes',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedAsistenteRoute = AuthenticatedAsistenteRouteImport.update({
+  id: '/asistente',
+  path: '/asistente',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCargasRoute = AuthenticatedCargasRouteImport.update({
+  id: '/cargas',
+  path: '/cargas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMantenimientoRoute =
+  AuthenticatedMantenimientoRouteImport.update({
+    id: '/mantenimiento',
+    path: '/mantenimiento',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedRutasRoute = AuthenticatedRutasRouteImport.update({
+  id: '/rutas',
+  path: '/rutas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
   getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AuthenticatedIndexRoute
+  '/acceder': typeof AccederRoute
+  '/ajustes': typeof AuthenticatedAjustesRoute
+  '/asistente': typeof AuthenticatedAsistenteRoute
+  '/cargas': typeof AuthenticatedCargasRoute
+  '/mantenimiento': typeof AuthenticatedMantenimientoRoute
+  '/rutas': typeof AuthenticatedRutasRoute
+  '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
+  '/acceder': typeof AccederRoute
+  '/ajustes': typeof AuthenticatedAjustesRoute
+  '/asistente': typeof AuthenticatedAsistenteRoute
+  '/cargas': typeof AuthenticatedCargasRoute
+  '/mantenimiento': typeof AuthenticatedMantenimientoRoute
+  '/rutas': typeof AuthenticatedRutasRoute
+  '/api/chat': typeof ApiChatRoute
+  '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/acceder': typeof AccederRoute
+  '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
+  '/_authenticated/asistente': typeof AuthenticatedAsistenteRoute
+  '/_authenticated/cargas': typeof AuthenticatedCargasRoute
+  '/_authenticated/mantenimiento': typeof AuthenticatedMantenimientoRoute
+  '/_authenticated/rutas': typeof AuthenticatedRutasRoute
+  '/api/chat': typeof ApiChatRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/acceder'
+    | '/ajustes'
+    | '/asistente'
+    | '/cargas'
+    | '/mantenimiento'
+    | '/rutas'
+    | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/acceder'
+    | '/ajustes'
+    | '/asistente'
+    | '/cargas'
+    | '/mantenimiento'
+    | '/rutas'
+    | '/api/chat'
+    | '/'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/acceder'
+    | '/_authenticated/ajustes'
+    | '/_authenticated/asistente'
+    | '/_authenticated/cargas'
+    | '/_authenticated/mantenimiento'
+    | '/_authenticated/rutas'
+    | '/api/chat'
+    | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AccederRoute: typeof AccederRoute
+  ApiChatRoute: typeof ApiChatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/acceder': {
+      id: '/acceder'
+      path: '/acceder'
+      fullPath: '/acceder'
+      preLoaderRoute: typeof AccederRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated/': {
+      id: '/_authenticated/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/ajustes': {
+      id: '/_authenticated/ajustes'
+      path: '/ajustes'
+      fullPath: '/ajustes'
+      preLoaderRoute: typeof AuthenticatedAjustesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/asistente': {
+      id: '/_authenticated/asistente'
+      path: '/asistente'
+      fullPath: '/asistente'
+      preLoaderRoute: typeof AuthenticatedAsistenteRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cargas': {
+      id: '/_authenticated/cargas'
+      path: '/cargas'
+      fullPath: '/cargas'
+      preLoaderRoute: typeof AuthenticatedCargasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/mantenimiento': {
+      id: '/_authenticated/mantenimiento'
+      path: '/mantenimiento'
+      fullPath: '/mantenimiento'
+      preLoaderRoute: typeof AuthenticatedMantenimientoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/rutas': {
+      id: '/_authenticated/rutas'
+      path: '/rutas'
+      fullPath: '/rutas'
+      preLoaderRoute: typeof AuthenticatedRutasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
       parentRoute: typeof rootRouteImport
     }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAjustesRoute: typeof AuthenticatedAjustesRoute
+  AuthenticatedAsistenteRoute: typeof AuthenticatedAsistenteRoute
+  AuthenticatedCargasRoute: typeof AuthenticatedCargasRoute
+  AuthenticatedMantenimientoRoute: typeof AuthenticatedMantenimientoRoute
+  AuthenticatedRutasRoute: typeof AuthenticatedRutasRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAjustesRoute: AuthenticatedAjustesRoute,
+  AuthenticatedAsistenteRoute: AuthenticatedAsistenteRoute,
+  AuthenticatedCargasRoute: AuthenticatedCargasRoute,
+  AuthenticatedMantenimientoRoute: AuthenticatedMantenimientoRoute,
+  AuthenticatedRutasRoute: AuthenticatedRutasRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AccederRoute: AccederRoute,
+  ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
