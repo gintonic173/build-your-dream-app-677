@@ -11,6 +11,10 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AccederRouteImport } from './routes/acceder'
+import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedCargasRouteImport } from './routes/_authenticated/cargas'
+import { Route as AuthenticatedMantenimientoRouteImport } from './routes/_authenticated/mantenimiento'
+import { Route as AuthenticatedRutasRouteImport } from './routes/_authenticated/rutas'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
@@ -22,6 +26,27 @@ const AccederRoute = AccederRouteImport.update({
   path: '/acceder',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCargasRoute = AuthenticatedCargasRouteImport.update({
+  id: '/cargas',
+  path: '/cargas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMantenimientoRoute =
+  AuthenticatedMantenimientoRouteImport.update({
+    id: '/mantenimiento',
+    path: '/mantenimiento',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedRutasRoute = AuthenticatedRutasRouteImport.update({
+  id: '/rutas',
+  path: '/rutas',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const ApiChatRoute = ApiChatRouteImport.update({
   id: '/api/chat',
   path: '/api/chat',
@@ -29,31 +54,50 @@ const ApiChatRoute = ApiChatRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AuthenticatedRouteRoute
+  '/': typeof AuthenticatedIndexRoute
   '/acceder': typeof AccederRoute
+  '/cargas': typeof AuthenticatedCargasRoute
+  '/mantenimiento': typeof AuthenticatedMantenimientoRoute
+  '/rutas': typeof AuthenticatedRutasRoute
   '/api/chat': typeof ApiChatRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof AuthenticatedRouteRoute
   '/acceder': typeof AccederRoute
+  '/cargas': typeof AuthenticatedCargasRoute
+  '/mantenimiento': typeof AuthenticatedMantenimientoRoute
+  '/rutas': typeof AuthenticatedRutasRoute
   '/api/chat': typeof ApiChatRoute
+  '/': typeof AuthenticatedIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_authenticated': typeof AuthenticatedRouteRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/acceder': typeof AccederRoute
+  '/_authenticated/cargas': typeof AuthenticatedCargasRoute
+  '/_authenticated/mantenimiento': typeof AuthenticatedMantenimientoRoute
+  '/_authenticated/rutas': typeof AuthenticatedRutasRoute
   '/api/chat': typeof ApiChatRoute
+  '/_authenticated/': typeof AuthenticatedIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/acceder' | '/api/chat'
+  fullPaths:
+    '/' | '/acceder' | '/cargas' | '/mantenimiento' | '/rutas' | '/api/chat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/acceder' | '/api/chat'
-  id: '__root__' | '/_authenticated' | '/acceder' | '/api/chat'
+  to: '/acceder' | '/cargas' | '/mantenimiento' | '/rutas' | '/api/chat' | '/'
+  id:
+    | '__root__'
+    | '/_authenticated'
+    | '/acceder'
+    | '/_authenticated/cargas'
+    | '/_authenticated/mantenimiento'
+    | '/_authenticated/rutas'
+    | '/api/chat'
+    | '/_authenticated/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  AuthenticatedRouteRoute: typeof AuthenticatedRouteRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AccederRoute: typeof AccederRoute
   ApiChatRoute: typeof ApiChatRoute
 }
@@ -74,6 +118,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AccederRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/': {
+      id: '/_authenticated/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/cargas': {
+      id: '/_authenticated/cargas'
+      path: '/cargas'
+      fullPath: '/cargas'
+      preLoaderRoute: typeof AuthenticatedCargasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/mantenimiento': {
+      id: '/_authenticated/mantenimiento'
+      path: '/mantenimiento'
+      fullPath: '/mantenimiento'
+      preLoaderRoute: typeof AuthenticatedMantenimientoRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/rutas': {
+      id: '/_authenticated/rutas'
+      path: '/rutas'
+      fullPath: '/rutas'
+      preLoaderRoute: typeof AuthenticatedRutasRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/api/chat': {
       id: '/api/chat'
       path: '/api/chat'
@@ -84,8 +156,25 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCargasRoute: typeof AuthenticatedCargasRoute
+  AuthenticatedMantenimientoRoute: typeof AuthenticatedMantenimientoRoute
+  AuthenticatedRutasRoute: typeof AuthenticatedRutasRoute
+  AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCargasRoute: AuthenticatedCargasRoute,
+  AuthenticatedMantenimientoRoute: AuthenticatedMantenimientoRoute,
+  AuthenticatedRutasRoute: AuthenticatedRutasRoute,
+  AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  AuthenticatedRouteRoute: AuthenticatedRouteRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AccederRoute: AccederRoute,
   ApiChatRoute: ApiChatRoute,
 }
