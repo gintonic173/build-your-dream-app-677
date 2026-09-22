@@ -7,9 +7,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { VehicleForm } from "@/components/vehicle-form";
+import { useAuth } from "@/lib/session";
 import { vehiclesRepo } from "@/lib/db";
 import { keys, useCharges, useMaintenance, useTrips, useVehicles } from "@/lib/queries";
-import { toDateInput } from "@/lib/ev";
 
 export const Route = createFileRoute("/_authenticated/ajustes")({
   head: () => ({
@@ -34,6 +34,7 @@ export const Route = createFileRoute("/_authenticated/ajustes")({
 function SettingsPage() {
   const vehicles = useVehicles();
   const vehicle = vehicles.data?.[0];
+  const { user } = useAuth();
   const queryClient = useQueryClient();
   const [busy, setBusy] = useState<"demo" | "clear" | "vehicle" | null>(null);
 
@@ -224,8 +225,7 @@ function SettingsPage() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="eyebrow">Correo</p>
-            <p className="mt-1 text-sm">{supabase ? "" : ""}</p>
-            <AccountEmail />
+            <p className="mt-1 text-sm">{user?.email ?? "—"}</p>
           </div>
           <Button variant="outline" className="gap-2" onClick={() => supabase.auth.signOut()}>
             <LogOut className="size-4" />
@@ -240,18 +240,3 @@ function SettingsPage() {
     </div>
   );
 }
-
-function AccountEmail() {
-  const [email, setEmail] = useState<string | null>(null);
-
-  if (email === null) {
-    supabase.auth.getSession().then(({ data }) => {
-      setEmail(data.session?.user.email ?? "—");
-    });
-    return <p className="mt-1 text-sm text-muted-foreground">…</p>;
-  }
-
-  return <p className="mt-1 text-sm">{email}</p>;
-}
-
-export { toDateInput };
