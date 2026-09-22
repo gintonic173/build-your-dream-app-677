@@ -53,6 +53,7 @@ const FIELDS: Field[] = [
     label: "Tipo de carga",
     type: "select",
     options: CHARGER_TYPES,
+    defaultValue: "home",
     half: true,
   },
   { name: "start_soc", label: "Batería inicial (%)", type: "number", half: true },
