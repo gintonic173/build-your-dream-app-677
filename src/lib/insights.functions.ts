@@ -86,7 +86,7 @@ export const runHealthCheck = createServerFn({ method: "POST" })
         "Cada título tiene como máximo 60 caracteres y el cuerpo 2 frases. " +
         "Prioriza anomalías de consumo o precio, tendencias de salud de batería y avisos de mantenimiento próximos. " +
         "Si no hay señal suficiente, devuelve menos hallazgos en vez de inventarlos.",
-      prompt: `Fecha de hoy: ${new Date().toISOString().slice(0, 10)}\nVehículo: ${JSON.stringify(vehicle)}\n\nDatos:\n${summarise(rows, trips.data ?? [], maintenance.data ?? [])}`,
+      prompt: `Fecha de hoy: ${new Date().toISOString().slice(0, 10)}\nVehículo: ${JSON.stringify(vehicle.data)}\n\nDatos:\n${summarise(rows, trips.data ?? [], maintenance.data ?? [])}`,
       providerOptions: {
         openai: {
           forceReasoning: true,
@@ -102,7 +102,7 @@ export const runHealthCheck = createServerFn({ method: "POST" })
 
     const payload = insights.slice(0, 5).map((insight) => ({
       user_id: userId,
-      vehicle_id: vehicle?.id ?? null,
+      vehicle_id: vehicle.data?.id ?? null,
       kind: insight.kind,
       severity: insight.severity,
       title: insight.title.slice(0, 120),
