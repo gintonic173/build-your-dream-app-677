@@ -11,6 +11,8 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AccederRouteImport } from './routes/acceder'
+import { Route as RecuperarRouteImport } from './routes/recuperar'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedAjustesRouteImport } from './routes/_authenticated/ajustes'
 import { Route as AuthenticatedAsistenteRouteImport } from './routes/_authenticated/asistente'
@@ -26,6 +28,16 @@ const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
 const AccederRoute = AccederRouteImport.update({
   id: '/acceder',
   path: '/acceder',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RecuperarRoute = RecuperarRouteImport.update({
+  id: '/recuperar',
+  path: '/recuperar',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
@@ -68,6 +80,8 @@ const ApiChatRoute = ApiChatRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/acceder': typeof AccederRoute
+  '/recuperar': typeof RecuperarRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/asistente': typeof AuthenticatedAsistenteRoute
   '/cargas': typeof AuthenticatedCargasRoute
@@ -77,6 +91,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/acceder': typeof AccederRoute
+  '/recuperar': typeof RecuperarRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/ajustes': typeof AuthenticatedAjustesRoute
   '/asistente': typeof AuthenticatedAsistenteRoute
   '/cargas': typeof AuthenticatedCargasRoute
@@ -89,6 +105,8 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/acceder': typeof AccederRoute
+  '/recuperar': typeof RecuperarRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/_authenticated/ajustes': typeof AuthenticatedAjustesRoute
   '/_authenticated/asistente': typeof AuthenticatedAsistenteRoute
   '/_authenticated/cargas': typeof AuthenticatedCargasRoute
@@ -102,6 +120,8 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/acceder'
+    | '/recuperar'
+    | '/reset-password'
     | '/ajustes'
     | '/asistente'
     | '/cargas'
@@ -111,6 +131,8 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/acceder'
+    | '/recuperar'
+    | '/reset-password'
     | '/ajustes'
     | '/asistente'
     | '/cargas'
@@ -122,6 +144,8 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_authenticated'
     | '/acceder'
+    | '/recuperar'
+    | '/reset-password'
     | '/_authenticated/ajustes'
     | '/_authenticated/asistente'
     | '/_authenticated/cargas'
@@ -134,6 +158,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AccederRoute: typeof AccederRoute
+  RecuperarRoute: typeof RecuperarRoute
+  ResetPasswordRoute: typeof ResetPasswordRoute
   ApiChatRoute: typeof ApiChatRoute
 }
 
@@ -151,6 +177,20 @@ declare module '@tanstack/react-router' {
       path: '/acceder'
       fullPath: '/acceder'
       preLoaderRoute: typeof AccederRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/recuperar': {
+      id: '/recuperar'
+      path: '/recuperar'
+      fullPath: '/recuperar'
+      preLoaderRoute: typeof RecuperarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/': {
@@ -229,6 +269,8 @@ const AuthenticatedRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AccederRoute: AccederRoute,
+  RecuperarRoute: RecuperarRoute,
+  ResetPasswordRoute: ResetPasswordRoute,
   ApiChatRoute: ApiChatRoute,
 }
 export const routeTree = rootRouteImport
