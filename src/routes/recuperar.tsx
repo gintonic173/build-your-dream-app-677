@@ -105,12 +105,14 @@ function RecoverPasswordScreen() {
           )}
         </div>
 
-        <Button asChild variant="ghost" className="mt-5 w-full gap-2">
-          <Link to="/acceder">
-            <ArrowLeft className="size-4" aria-hidden="true" />
-            Volver a entrar
-          </Link>
-        </Button>
+        {!sent && (
+          <Button asChild variant="ghost" className="mt-5 w-full gap-2">
+            <Link to="/acceder">
+              <ArrowLeft className="size-4" aria-hidden="true" />
+              Volver a entrar
+            </Link>
+          </Button>
+        )}
       </div>
     </div>
   );
