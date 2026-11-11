@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from "react";
-import { Navigate, createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Link, Navigate, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { useAuth } from "@/lib/session";
@@ -144,6 +144,16 @@ function AccessScreen() {
                 onChange={(event) => setPassword(event.target.value)}
               />
             </div>
+            {mode === "signin" && (
+              <div className="-mt-1 text-right">
+                <Link
+                  to="/recuperar"
+                  className="text-sm font-medium text-primary underline-offset-4 hover:underline"
+                >
+                  ¿Has olvidado la contraseña?
+                </Link>
+              </div>
+            )}
             <Button
               type="submit"
               disabled={busy}
